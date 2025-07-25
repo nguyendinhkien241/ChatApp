@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { nanoid } from "nanoid";
 
 const userSchema = new mongoose.Schema(
   {
@@ -34,6 +35,15 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female", "other", ""],
       default: "",
     },
+    userCode: {
+      type: String,
+      unique: true,
+      default: () => nanoid(8),
+    },
+    friends: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
   },
   {
     timestamps: true,

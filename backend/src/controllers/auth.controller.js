@@ -33,6 +33,8 @@ export const login = async (req, res) => {
       dateOfBirth: user.dateOfBirth,
       bio: user.bio,
       gender: user.gender,
+      userCode: user.userCode,
+      friends: user.friends,
     });
   } catch (error) {
     console.log("Error in user login", error.message);
@@ -87,6 +89,8 @@ export const register = async (req, res) => {
         dateOfBirth: newUser.dateOfBirth,
         bio: newUser.bio,
         gender: newUser.gender,
+        userCode: newUser.userCode,
+        friends: newUser.friends,
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
@@ -164,6 +168,8 @@ export const updateProfile = async (req, res) => {
       dateOfBirth: updatedUser.dateOfBirth,
       bio: updatedUser.bio,
       gender: updatedUser.gender,
+      userCode: updatedUser.userCode,
+      friends: updatedUser.friends,
     });
   } catch (error) {
     console.log("Error in updating profile", error.message);

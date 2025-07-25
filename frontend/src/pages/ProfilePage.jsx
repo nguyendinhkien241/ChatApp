@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Camera, Mail, User, Calendar, FileText, Users, Key } from 'lucide-react';
+import { Camera, Mail, User, Calendar, FileText, Users, Key, Copy, Hash } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -38,7 +38,7 @@ const ProfilePage = () => {
       setIsEditing(false);
       toast.success('Profile updated successfully!');
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error('Failed to update profile' + error);
     }
   }
 
@@ -50,6 +50,11 @@ const ProfilePage = () => {
       gender: authUser?.gender || ''
     });
     setIsEditing(false);
+  }
+
+  const copyUserCode = () => {
+    navigator.clipboard.writeText(authUser?.userCode);
+    toast.success('User code copied to clipboard!');
   }
 
   return (
@@ -146,6 +151,26 @@ const ProfilePage = () => {
               </div>
               <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.email}</p>
               <p className="text-xs text-zinc-500">Email cannot be changed</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-sm text-zinc-400 flex items-center gap-2">
+                <Hash className="w-4 h-4" />
+                User Code
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="px-4 py-2.5 bg-base-200 rounded-lg border flex-1 font-mono">
+                  {authUser?.userCode}
+                </p>
+                <button
+                  onClick={copyUserCode}
+                  className="btn btn-ghost btn-sm"
+                  title="Copy user code"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-zinc-500">Share this code with friends to let them find you</p>
             </div>
 
             <div className="space-y-1.5">

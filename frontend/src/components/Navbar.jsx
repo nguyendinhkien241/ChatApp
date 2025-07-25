@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useAuthStore } from '../store/useAuthStore';
 import { Link } from 'react-router-dom';
-import { LogOut, MessageSquare, Settings, User } from 'lucide-react';
+import { LogOut, MessageSquare, Settings, User, Users, Bell } from 'lucide-react';
 
 const Navbar = () => {
-  const { logOut, authUser } = useAuthStore();
+  const { logOut, authUser, unreadFriendRequests, loadFriendRequests, markFriendRequestsAsRead } = useAuthStore();
+
+  useEffect(() => {
+    if (authUser) {
+      loadFriendRequests();
+    }
+  }, [authUser, loadFriendRequests]);
   return (
     <header className='bg-base-100 border-b border-base-300
     fixed w-full top-0 z-40 backdrop-blur-lg hover:bg-base-100/80'>
@@ -28,6 +34,20 @@ const Navbar = () => {
             </Link>
             {authUser && (
               <>
+                <Link 
+                  to={"/friends"} 
+                  className={`btn btn-sm gap-2 relative`}
+                  onClick={() => markFriendRequestsAsRead()}
+                >
+                  <Users className="size-5" />
+                  <span className="hidden sm:inline">Friends</span>
+                  {unreadFriendRequests > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadFriendRequests}
+                    </div>
+                  )}
+                </Link>
+
                 <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                   <User className="size-5" />
                   <span className="hidden sm:inline">Profile</span>

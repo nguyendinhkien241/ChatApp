@@ -34,6 +34,8 @@
 - **Frontend**:
   - Tạo component `FriendsPage` để tìm kiếm và gửi lời mời.
   - Cập nhật `useAuthStore.js` để xử lý lời mời kết bạn.
+  - Tạo component Notification và icon Notification trên thanh navigation để hiển thị thông báo kết bạn
+  - Cập nhật ProfilePage để hiển thị UserCode
 - **Thư viện**: nanoid, axios, react-hot-toast.
 
 ## 4. Tạo nhóm chat và chat nhóm

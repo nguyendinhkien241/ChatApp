@@ -14,6 +14,8 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
+  friendRequests: [],
+  unreadFriendRequests: 0,
 
   checkAuth: async () => {
     try {
@@ -111,16 +113,51 @@ export const useAuthStore = create((set, get) => ({
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds})
-    })
+    });
+
+    socket.on("newFriendRequest", (data) => {
+      set((state) => ({
+        friendRequests: [...state.friendRequests, data.request],
+        unreadFriendRequests: state.unreadFriendRequests + 1
+      }));
+      toast.success(`${data.request.from.fullName} sent you a friend request!`);
+    });
+
+    socket.on("friendRequestResponse", (data) => {
+      const { action, request } = data;
+      if (action === "accept") {
+        toast.success(`${request.to.fullName} accepted your friend request!`);
+      } else {
+        toast.info(`${request.to.fullName} declined your friend request`);
+      }
+    });
   },
 
   disConnectSocket: () => {
     const socket = get().socket;
     if (socket?.connected) {
       socket.off("getOnlineUsers");
+      socket.off("newFriendRequest");
+      socket.off("friendRequestResponse");
       socket.disconnect();
       set({ socket: null });
     }
+  },
+
+  loadFriendRequests: async () => {
+    try {
+      const res = await axiosInstance.get("/friends/requests");
+      set({ 
+        friendRequests: res.data,
+        unreadFriendRequests: res.data.length
+      });
+    } catch (error) {
+      console.log("Error loading friend requests", error);
+    }
+  },
+
+  markFriendRequestsAsRead: () => {
+    set({ unreadFriendRequests: 0 });
   },
 
 }))
