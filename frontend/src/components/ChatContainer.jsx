@@ -5,6 +5,9 @@ import ChatInput from './ChatInput';
 import MessageSkeleton from './skeleton/MessageSkeleton';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatMessageTime } from '../lib/utils';
+import FileAttachment from './attachments/FileAttachment';
+import AudioAttachment from './attachments/AudioAttachment';
+import LinkPreview from './attachments/LinkPreview';
 
 const ChatContainer = () => {
   const { messages, getMessages, isMessagesLoading, selectedUser, subcribeToMessage, unsubcribeFromMessage } = useChatStore();
@@ -16,8 +19,6 @@ const ChatContainer = () => {
     subcribeToMessage()
     return () => unsubcribeFromMessage();
   }, [selectedUser._id, getMessages, subcribeToMessage, unsubcribeFromMessage]);
-
-  console.log(messages);
 
   useEffect(() => {
     if(messageEndRef.current && messages) {
@@ -66,7 +67,20 @@ const ChatContainer = () => {
                   className="sm:max-w-[200px] rounded-md mb-2"
                 />
               )}
-              {message.text && <p>{message.text}</p>}
+              
+              {message.file && (
+                <FileAttachment file={message.file} />
+              )}
+              
+              {message.audio && (
+                <AudioAttachment audio={message.audio} />
+              )}
+              
+              {message.text && (
+                <div>
+                  <LinkPreview text={message.text} />
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -75,5 +89,6 @@ const ChatContainer = () => {
     </div>
   )
 }
+
 
 export default ChatContainer

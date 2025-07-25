@@ -6,6 +6,7 @@ import {
   register,
   logout,
   updateProfile,
+  changePassword,
   checkAuth,
 } from "../controllers/auth.controller.js";
 
@@ -16,6 +17,7 @@ router.post("/register", register);
 router.post("/logout", logout);
 
 router.put("/updateProfile", protectRoute, updateProfile);
+router.put("/changePassword", protectRoute, changePassword);
 
 router.get("/check", protectRoute, checkAuth);
 export default router;

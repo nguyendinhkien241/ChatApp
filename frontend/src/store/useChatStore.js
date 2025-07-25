@@ -37,9 +37,11 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (messageData) => {
     const { messages, selectedUser } = get();
     try {
+      // Always use JSON - backend will handle base64 data
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
       set({messages:[...messages, res.data]});
     } catch (error) {
+      console.error('Send message error:', error.response?.data || error.message);
       toast.error(error.response?.data?.message || "Fail to send message");
       throw error;
     }
@@ -51,10 +53,7 @@ export const useChatStore = create((set, get) => ({
       return;
     }
 
-    console.log(selectedUser)
-
     const socket = useAuthStore.getState().socket;
-    console.log("Socket:", socket, "Connected:", socket?.connected);
 
     socket.on("newMessage", (newMessage) => {
       if(newMessage.SenderId !== selectedUser._id ) return;

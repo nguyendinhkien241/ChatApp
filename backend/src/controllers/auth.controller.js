@@ -30,6 +30,9 @@ export const login = async (req, res) => {
       email: user.email,
       fullName: user.fullName,
       profilePic: user.profilePic,
+      dateOfBirth: user.dateOfBirth,
+      bio: user.bio,
+      gender: user.gender,
     });
   } catch (error) {
     console.log("Error in user login", error.message);
@@ -81,6 +84,9 @@ export const register = async (req, res) => {
         email: newUser.email,
         fullName: newUser.fullName,
         profilePic: newUser.profilePic,
+        dateOfBirth: newUser.dateOfBirth,
+        bio: newUser.bio,
+        gender: newUser.gender,
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
@@ -109,36 +115,106 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { profilePic } = req.body;
+    const { fullName, profilePic, dateOfBirth, bio, gender } = req.body;
     const userId = req.user._id;
-    // Validate required fields
-    if (!profilePic) {
-      return res
-        .status(400)
-        .json({ message: "Please provide profile picture" });
+
+    const updateData = {};
+
+    // Update fullName if provided
+    if (fullName) {
+      updateData.fullName = fullName;
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updateUser = await User.findByIdAndUpdate(
+    // Update profilePic if provided
+    if (profilePic) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePic);
+      updateData.profilePic = uploadResponse.secure_url;
+    }
+
+    // Update dateOfBirth if provided
+    if (dateOfBirth) {
+      updateData.dateOfBirth = new Date(dateOfBirth);
+    }
+
+    // Update bio if provided
+    if (bio !== undefined) {
+      updateData.bio = bio;
+    }
+
+    // Update gender if provided
+    if (gender !== undefined) {
+      updateData.gender = gender;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
       userId,
-      {
-        profilePic: uploadResponse.secure_url,
-      },
+      updateData,
       { new: true }
     );
 
-    if (!updateUser) {
+    if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     return res.status(200).json({
-      _id: updateUser._id,
-      email: updateUser.email,
-      fullName: updateUser.fullName,
-      profilePic: updateUser.profilePic,
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      profilePic: updatedUser.profilePic,
+      dateOfBirth: updatedUser.dateOfBirth,
+      bio: updatedUser.bio,
+      gender: updatedUser.gender,
     });
   } catch (error) {
     console.log("Error in updating profile", error.message);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    // Validate required fields
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        message: "Please provide both current and new password" 
+      });
+    }
+
+    // Check new password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        message: "New password must be at least 6 characters long" 
+      });
+    }
+
+    // Get user with password
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const salt = bcrypt.genSaltSync(10);
+    const hashedNewPassword = bcrypt.hashSync(newPassword, salt);
+
+    // Update password
+    await User.findByIdAndUpdate(userId, { password: hashedNewPassword });
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.log("Error in changing password", error.message);
     return res.status(500).json({
       message: "Internal server error",
       error: error.message,
